@@ -1,0 +1,112 @@
+name: QuickLookNFO
+
+options:
+  bundleIdPrefix: com.yanvi
+  deploymentTarget:
+    macOS: "13.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+packages:
+  NFORenderKit:
+    path: ../NFORenderKit
+
+targets:
+  QuickLookNFOApp:
+    type: application
+    platform: macOS
+    deploymentTarget: "13.0"
+    sources:
+      - path: QuickLookNFOApp
+        excludes:
+          - Info.plist
+    info:
+      path: QuickLookNFOApp/Info.plist
+      properties:
+        LSApplicationCategoryType: public.app-category.utilities
+        NSHumanReadableCopyright: "Yet Another NFO Viewer — Quick Look Extension"
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: NFO File
+            CFBundleTypeRole: Viewer
+            CFBundleTypeExtensions: [nfo]
+            LSItemContentTypes: [com.scene.nfo]
+          - CFBundleTypeName: ASC File
+            CFBundleTypeRole: Viewer
+            CFBundleTypeExtensions: [asc]
+            LSItemContentTypes: [com.scene.asc]
+          - CFBundleTypeName: DIZ File
+            CFBundleTypeRole: Viewer
+            CFBundleTypeExtensions: [diz]
+            LSItemContentTypes: [com.scene.diz]
+        UTExportedTypeDeclarations:
+          - UTTypeIdentifier: com.scene.nfo
+            UTTypeDescription: NFO Scene Release File
+            UTTypeConformsTo: [public.plain-text]
+            UTTypeTagSpecification:
+              public.filename-extension: [nfo]
+          - UTTypeIdentifier: com.scene.asc
+            UTTypeDescription: ASCII Art File
+            UTTypeConformsTo: [public.plain-text]
+            UTTypeTagSpecification:
+              public.filename-extension: [asc]
+          - UTTypeIdentifier: com.scene.diz
+            UTTypeDescription: DIZ File
+            UTTypeConformsTo: [public.plain-text]
+            UTTypeTagSpecification:
+              public.filename-extension: [diz]
+    entitlements:
+      path: QuickLookNFOApp/QuickLookNFOApp.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.yanvi.QuickLookNFO
+        SWIFT_VERSION: "5.9"
+        MACOSX_DEPLOYMENT_TARGET: "13.0"
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - target: NFOPreviewExtension
+        embed: true
+        link: false
+
+  NFOPreviewExtension:
+    type: app-extension
+    platform: macOS
+    deploymentTarget: "13.0"
+    sources:
+      - path: NFOPreviewExtension
+        excludes:
+          - Info.plist
+      - path: Shared/Fonts
+        buildPhase: resources
+    info:
+      path: NFOPreviewExtension/Info.plist
+      properties:
+        CFBundleDisplayName: NFO Preview Extension
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.quicklook.preview
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PreviewViewController
+          NSExtensionAttributes:
+            QLIsDataBasedPreview: false
+            QLSupportedContentTypes:
+              - com.scene.nfo
+              - com.scene.asc
+              - com.scene.diz
+            QLSupportsSearchableItems: false
+    entitlements:
+      path: NFOPreviewExtension/NFOPreviewExtension.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.files.user-selected.read-only: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.yanvi.QuickLookNFO.NFOPreviewExtension
+        SWIFT_VERSION: "5.9"
+        MACOSX_DEPLOYMENT_TARGET: "13.0"
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_STYLE: Automatic
+        APPLICATION_EXTENSION_API_ONLY: YES
+    dependencies:
+      - package: NFORenderKit
+        product: NFORenderKit
